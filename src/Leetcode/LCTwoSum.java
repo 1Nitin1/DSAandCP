@@ -16,3 +16,7 @@ class LCTwoSum {
         return new int[2];
     }
 }
+
+//TC=O(N)
+//SC=O(N)
+//Concept used = Hashing
