@@ -19,4 +19,4 @@ public class LCPalindromeNumber {
 }
 //TC=O(D)
 //SC=O(1)
-//Concept used = brute force
+//Concept used = brute force solution
