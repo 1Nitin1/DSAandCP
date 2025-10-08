@@ -1,36 +1,28 @@
+package cp31;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-public class WalkingMaster {
+public class ArrayColoring {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
         int t = Integer.parseInt(br.readLine());
         while(t-->0){
+            int n = Integer.parseInt(br.readLine());
             StringTokenizer st = new StringTokenizer(br.readLine());
-            int a =Integer.parseInt(st.nextToken());
-            int b =Integer.parseInt(st.nextToken());
-            int c =Integer.parseInt(st.nextToken());
-            int d =Integer.parseInt(st.nextToken());
             int ans=0;
-            if(d<b){
-                out.println(-1);
-                continue;
-            }else{
-                ans+=d-b;
-                a+=ans;
-                if(c>a){
-                    out.println(-1);
-                    continue;
-                }else{
-                    ans+=a-c;
+            for(int i=0;i<n;i++){
+                int a = Integer.parseInt(st.nextToken());
+                if((a&1)==1){
+                    ans^=1;
                 }
             }
-            out.println(ans);
-
+            String s = ans==1?"NO":"YES";
+            out.println(s);
         }
         out.flush();
     }
