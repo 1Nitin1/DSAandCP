@@ -17,6 +17,6 @@ class LCTwoSum {
     }
 }
 
-//TC=O(N)
-//SC=O(N)
+//TC=O(N) or TC=O(N^2)
+//SC=O(N) or SC=O(1)
 //Concept used = Hashing
