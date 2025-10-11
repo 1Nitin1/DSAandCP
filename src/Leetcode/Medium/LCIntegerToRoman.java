@@ -19,3 +19,6 @@ public class LCIntegerToRoman {
         return ans.toString();
     }
 }
+//TC=O(D)
+//SC=O(1)
+//using hashing

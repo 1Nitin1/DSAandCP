@@ -26,3 +26,6 @@ public class LCRomanToInteger {
         return ans;
     }
 }
+//TC=O(D)
+//SC=O(1)
+//using hashing

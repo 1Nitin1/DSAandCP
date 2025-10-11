@@ -36,3 +36,6 @@ class LCZigzagConversion {
         return str.toString();
     }
 }
+//TC=O(N)
+//SC=O(rows)
+//using greedy approach
