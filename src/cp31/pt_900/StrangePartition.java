@@ -1,4 +1,4 @@
-package cp31;
+package cp31.pt_900;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,17 +14,17 @@ public class StrangePartition {
         while(t-->0){
             StringTokenizer st = new StringTokenizer(br.readLine());
             int n = Integer.parseInt(st.nextToken());
-            float x = Integer.parseInt(st.nextToken());
+            double x = Double.parseDouble(st.nextToken());
             st=new StringTokenizer(br.readLine());
-            int sum = 0;
-            int max=0;
+            double sum = 0;
+            long max=0;
             for(int i=0;i<n;i++){
                 int a = Integer.parseInt(st.nextToken());
                 sum+=a;
-                max+=Math.ceil((float)a/x);
+                max+=Math.ceil(a/x);
             }
-            sum= (int) Math.ceil(sum/x);
-            out.println(sum+" "+max);
+            sum= (long) Math.ceil(sum/x);
+            out.println((long)sum+" "+max);
         }
         out.flush();
     }
