@@ -1,4 +1,4 @@
-package Leetcode;
+package Leetcode.Easy;
 
 public class LCPalindromeNumber {
     public boolean isPalindrome(int x) {
