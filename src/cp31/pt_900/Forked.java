@@ -1,3 +1,5 @@
+package cp31.pt_900;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,7 +30,7 @@ public class Forked {
             int ans = 0;
             for(int i=0;i<8;i++){
                 if(queen(a,b,xk+dx[i],yk+dy[i],xq,yq)){
-                    
+
                     if(!(setx.contains(xk+dx[i]) && sety.contains(yk+dy[i]))){
                         ans++;
                         setx.add(xk+dx[i]);
