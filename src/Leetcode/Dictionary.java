@@ -5,8 +5,13 @@ import java.util.Set;
 
 public class Dictionary {
     public static void main(String[] args) {
-        Set<Integer> set = new HashSet<>();
-        set.add(1);set.add(9);set.add(6);
-        set.add(12);set.add(13);
+        boolean[] solved = new boolean[5000];
+        int[] arr = {1,9,6,12,13,733,200,463,695,1254,
+                1261,1302,129,207,210,404,997,3397,3718,3719,
+                1791,2368};
+        for(int a:arr){
+            solved[a]=true;
+        }
+
     }
 }
