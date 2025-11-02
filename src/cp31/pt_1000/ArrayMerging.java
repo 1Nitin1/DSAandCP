@@ -1,3 +1,5 @@
+package cp31.pt_1000;
+
 import java.io.*;
 import java.util.*;
 public class ArrayMerging {
