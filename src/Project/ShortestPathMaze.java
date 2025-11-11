@@ -1,91 +1,106 @@
 package Project;
 
+import javax.sound.midi.Soundbank;
+import java.util.*;
+
 import java.util.*;
 
 public class ShortestPathMaze {
-
-    static class Node implements Comparable<Node> {
+    static class Cell {
         int r, c, d;
-        Node(int r, int c, int d) {
+        Cell(int r, int c, int d) {
             this.r = r;
             this.c = c;
             this.d = d;
         }
-        public int compareTo(Node o) {
-            return this.d - o.d;
-        }
     }
 
-    static int[] dr = {1, -1, 0, 0};
-    static int[] dc = {0, 0, 1, -1};
-
     public static void main(String[] args) {
+
         Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
+        int n = sc.nextInt();
+        int m = n;
         sc.nextLine();
-        char[][] a = new char[n][m];
-        int sr = 0, scs = 0, er = 0, ec = 0;
+
+        char[][] g = new char[n][m];
+        int sr = -1, scs = -1, er = -1, ecs = -1;
 
         for (int i = 0; i < n; i++) {
             String s = sc.nextLine();
             for (int j = 0; j < m; j++) {
-                a[i][j] = s.charAt(j);
-                if (a[i][j] == 'S') { sr = i; scs = j; }
-                if (a[i][j] == 'E') { er = i; ec = j; }
+                g[i][j] = s.charAt(j);
+                if (g[i][j] == 'S') {
+                    sr = i;
+                    scs = j;
+                }
+                if (g[i][j] == 'E') {
+                    er = i;
+                    ecs = j;
+                }
             }
         }
-
+        long start = System.currentTimeMillis();
         int[][] dist = new int[n][m];
-        for (int[] r : dist) Arrays.fill(r, Integer.MAX_VALUE);
+        for (int[] a : dist) Arrays.fill(a, Integer.MAX_VALUE);
+
         int[][] pr = new int[n][m];
         int[][] pc = new int[n][m];
-        for (int[] r : pr) Arrays.fill(r, -1);
-        for (int[] c : pc) Arrays.fill(c, -1);
 
-        PriorityQueue<Node> pq = new PriorityQueue<>();
-        pq.add(new Node(sr, scs, 0));
+        PriorityQueue<Cell> pq = new PriorityQueue<>((a, b) -> a.d - b.d);
         dist[sr][scs] = 0;
+        pq.add(new Cell(sr, scs, 0));
+
+        int[] dr = {1, -1, 0, 0};
+        int[] dc = {0, 0, 1, -1};
 
         while (!pq.isEmpty()) {
-            Node cur = pq.poll();
+            Cell cur = pq.poll();
             if (cur.d != dist[cur.r][cur.c]) continue;
-            if (cur.r == er && cur.c == ec) break;
+            if (cur.r == er && cur.c == ecs) break;
 
             for (int k = 0; k < 4; k++) {
                 int nr = cur.r + dr[k];
                 int nc = cur.c + dc[k];
                 if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
-                if (a[nr][nc] == '#') continue;
+                if (g[nr][nc] == '#') continue;
 
-                int w = (a[nr][nc] == 'S' || a[nr][nc] == 'E') ? 0 : (a[nr][nc] - '0');
+                int w = (g[nr][nc] == 'S' || g[nr][nc] == 'E') ? 0 : (g[nr][nc] - '0');
                 int nd = cur.d + w;
 
                 if (nd < dist[nr][nc]) {
                     dist[nr][nc] = nd;
-                    pq.add(new Node(nr, nc, nd));
                     pr[nr][nc] = cur.r;
                     pc[nr][nc] = cur.c;
+                    pq.add(new Cell(nr, nc, nd));
                 }
             }
         }
 
-        char[][] o = new char[n][m];
-        for (int i = 0; i < n; i++) Arrays.fill(o[i], '.');
+        if (dist[er][ecs] == Integer.MAX_VALUE) {
+            System.out.println("No Path");
+            return;
+        }
 
-        int r = er, c = ec;
+        int r = er, c = ecs;
         while (!(r == sr && c == scs)) {
-            o[r][c] = '$';
-            int rr = pr[r][c], cc = pc[r][c];
-            r = rr;
-            c = cc;
+            if (g[r][c] != 'E') g[r][c] = '$';
+            int nr = pr[r][c];
+            int nc = pc[r][c];
+            r = nr;
+            c = nc;
         }
-        o[sr][scs] = '$';
-        System.out.println("Fastest Path : ");
+        g[sr][scs] = 'S';
+        System.out.println("Optimal Path :");
         for (int i = 0; i < n; i++) {
-            System.out.println(new String(o[i]));
+            for (int j = 0; j < m; j++) {
+                char ch = g[i][j];
+                if (ch != '$' && ch != 'S' && ch != 'E') ch = '.';
+                System.out.print(ch);
+            }
+            System.out.println();
         }
-
-        System.out.printf("Time Taken : %d units",dist[er][ec]);
+        long end=System.currentTimeMillis();
+        System.out.println("Time Taken = " + dist[er][ecs]);
+        System.out.printf("Time Taken To Execute : %d ms",end-start);
     }
 }
-
