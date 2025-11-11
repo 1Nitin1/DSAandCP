@@ -3,24 +3,27 @@ package Project;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 
 public class NumericalIntegrationGUI extends JFrame {
 
-    JComboBox<String> methodBox, functionBox;
-    JTextField aField, bField, nField;
-    JTextArea output;
+    private JComboBox<String> methodBox, functionBox;
+    private JTextField aField, bField, nField;
+    private JTextArea output;
 
     public NumericalIntegrationGUI() {
-        setTitle("Numerical Integration Calculator");
-        setSize(650, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Numerical Integration Solver");
+        setSize(700, 600);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // ---------- TOP PANEL ----------
-        JPanel top = new JPanel(new GridLayout(6, 2, 10, 10));
+        // ---------------- TOP PANEL ----------------
+        JPanel top = new JPanel();
+        top.setLayout(new GridLayout(5, 2, 10, 10));
+        top.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        top.add(new JLabel("Select Method:"));
+        // Method Dropdown
+        top.add(new JLabel("Select Method:", JLabel.RIGHT));
         methodBox = new JComboBox<>(new String[]{
                 "Trapezoidal Rule",
                 "Simpson 1/3 Rule",
@@ -28,159 +31,136 @@ public class NumericalIntegrationGUI extends JFrame {
         });
         top.add(methodBox);
 
-        top.add(new JLabel("Select Function:"));
+        // Function Dropdown
+        top.add(new JLabel("Select Function:", JLabel.RIGHT));
         functionBox = new JComboBox<>(new String[]{
                 "sin(x)",
-                "1 / (1 + x^2)",
-                "x / (1 + x^2)",
+                "cos(x)",
+                "e^x",
+                "ln(x+1)",
                 "x^2",
-                "e^x"
+                "x^3",
+                "1/(1 + x^2)",
+                "x/(1 + x^2)"
         });
         top.add(functionBox);
 
-        top.add(new JLabel("Lower Limit a:"));
-        aField = new JTextField();
+        // a input
+        top.add(new JLabel("Lower Limit (a):", JLabel.RIGHT));
+        aField = new JTextField("0");
         top.add(aField);
 
-        top.add(new JLabel("Upper Limit b:"));
-        bField = new JTextField();
+        // b input
+        top.add(new JLabel("Upper Limit (b):", JLabel.RIGHT));
+        bField = new JTextField("1");
         top.add(bField);
 
-        top.add(new JLabel("Number of Intervals n:"));
-        nField = new JTextField();
+        // n input
+        top.add(new JLabel("Number of Intervals (n):", JLabel.RIGHT));
+        nField = new JTextField("10");
         top.add(nField);
-
-        JButton computeBtn = new JButton("Compute");
-        top.add(computeBtn);
 
         add(top, BorderLayout.NORTH);
 
-        // ---------- OUTPUT AREA ----------
+        // ---------------- OUTPUT AREA ----------------
         output = new JTextArea();
         output.setEditable(false);
-        output.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        output.setFont(new Font("Monospaced", Font.PLAIN, 16));
         JScrollPane scroll = new JScrollPane(output);
+        scroll.setBorder(BorderFactory.createTitledBorder("Result"));
         add(scroll, BorderLayout.CENTER);
 
-        // ---------- ACTION ----------
-        computeBtn.addActionListener(e -> compute());
+        // ---------------- SOLVE BUTTON ----------------
+        JButton solve = new JButton("Compute");
+        solve.setFont(new Font("Arial", Font.BOLD, 18));
+        solve.addActionListener(e -> solveIntegration());
+        add(solve, BorderLayout.SOUTH);
+
+        setVisible(true);
     }
 
-    // --------------------------- FUNCTION LIBRARY ---------------------------
-    Function<Double, Double> getFunction(int choice) {
-        switch (choice) {
-            case 0: return Math::sin;
-            case 1: return x -> 1.0 / (1.0 + x * x);
-            case 2: return x -> x / (1.0 + x * x);
-            case 3: return x -> x * x;
-            case 4: return Math::exp;
-        }
-        return null;
+    // ---------------- GET FUNCTION ----------------
+    public DoubleUnaryOperator getFunction(int choice) {
+        return switch (choice) {
+            case 0 -> Math::sin;
+            case 1 -> Math::cos;
+            case 2 -> Math::exp;
+            case 3 -> (x -> Math.log(x + 1));
+            case 4 -> (x -> x * x);
+            case 5 -> (x -> x * x * x);
+            case 6 -> (x -> 1.0 / (1.0 + x * x));
+            case 7 -> (x -> x / (1.0 + x * x));
+            default -> (x -> 0);
+        };
     }
 
-    // --------------------------- TRAPEZOIDAL ---------------------------
-    double trapezoidal(Function<Double, Double> f, double a, double b, int n) {
-        double h = (b - a) / n;
-        double sum = 0;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("h = ").append(h).append("\n");
-
-        for (int i = 1; i < n; i++) {
-            double x = a + i * h;
-            double y = f.apply(x);
-            sum += y;
-            sb.append(String.format("X%-2d = %-10.5f  Y = %f\n", i, x, y));
-        }
-
-        double res = (h / 2.0) * (f.apply(a) + f.apply(b) + 2 * sum);
-        output.append(sb.toString());
-        return res;
-    }
-
-    // --------------------------- SIMPSON 1/3 ---------------------------
-    double simpson13(Function<Double, Double> f, double a, double b, int n) {
-        if (n % 2 != 0) {
-            output.append("ERROR: n must be EVEN for Simpson 1/3 rule!\n");
-            return Double.NaN;
-        }
-
-        double h = (b - a) / n;
-        double odd = 0, even = 0;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("h = ").append(h).append("\n");
-
-        for (int i = 1; i < n; i++) {
-            double x = a + i * h;
-            double y = f.apply(x);
-            if (i % 2 == 0) even += y; else odd += y;
-            sb.append(String.format("X%-2d = %-10.5f  Y = %f\n", i, x, y));
-        }
-
-        double res = (h / 3.0) * (f.apply(a) + f.apply(b) + 4 * odd + 2 * even);
-        output.append(sb.toString());
-        return res;
-    }
-
-    // --------------------------- SIMPSON 3/8 ---------------------------
-    double simpson38(Function<Double, Double> f, double a, double b, int n) {
-        if (n % 3 != 0) {
-            output.append("ERROR: n must be a multiple of 3 for Simpson 3/8 rule!\n");
-            return Double.NaN;
-        }
-
-        double h = (b - a) / n;
-        double sum3 = 0, sumRest = 0;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("h = ").append(h).append("\n");
-
-        for (int i = 1; i < n; i++) {
-            double x = a + i * h;
-            double y = f.apply(x);
-
-            if (i % 3 == 0) sum3 += y;
-            else sumRest += y;
-
-            sb.append(String.format("X%-2d = %-10.5f  Y = %f\n", i, x, y));
-        }
-
-        double res = (3 * h / 8.0) * (f.apply(a) + f.apply(b) + 3 * sumRest + 2 * sum3);
-        output.append(sb.toString());
-        return res;
-    }
-
-    // --------------------------- COMPUTE BUTTON HANDLER ---------------------------
-    void compute() {
-        output.setText("");
-
+    // ---------------- SOLVE NUMERICAL INTEGRATION ----------------
+    private void solveIntegration() {
         try {
             double a = Double.parseDouble(aField.getText());
             double b = Double.parseDouble(bField.getText());
             int n = Integer.parseInt(nField.getText());
 
-            Function<Double, Double> f = getFunction(functionBox.getSelectedIndex());
-            int method = methodBox.getSelectedIndex();
+            DoubleUnaryOperator f = getFunction(functionBox.getSelectedIndex());
 
-            double ans = 0;
+            String method = (String) methodBox.getSelectedItem();
+            double result = 0;
 
-            switch (method) {
-                case 0: ans = trapezoidal(f, a, b, n); break;
-                case 1: ans = simpson13(f, a, b, n); break;
-                case 2: ans = simpson38(f, a, b, n); break;
+            if (method.equals("Trapezoidal Rule")) {
+                result = trapezoidal(f, a, b, n);
+            } else if (method.equals("Simpson 1/3 Rule")) {
+                if (n % 2 != 0) {
+                    output.setText("ERROR: n must be EVEN for Simpson 1/3");
+                    return;
+                }
+                result = simpson13(f, a, b, n);
+            } else {
+                if (n % 3 != 0) {
+                    output.setText("ERROR: n must be MULTIPLE OF 3 for Simpson 3/8");
+                    return;
+                }
+                result = simpson38(f, a, b, n);
             }
 
-            output.append("\n------------------------------------\n");
-            output.append("RESULT = " + ans + "\n");
+            output.setText("Method: " + method +
+                    "\nFunction: " + functionBox.getSelectedItem() +
+                    "\n\nResult = " + result);
 
-        } catch (Exception e) {
-            output.append("Invalid Input!\n");
+        } catch (Exception ex) {
+            output.setText("Invalid Input! Please enter numeric values.");
         }
     }
 
+    // ---------------- METHODS ----------------
+
+    double trapezoidal(DoubleUnaryOperator f, double a, double b, int n) {
+        double h = (b - a) / n;
+        double sum = f.applyAsDouble(a) + f.applyAsDouble(b);
+        for (int i = 1; i < n; i++) {
+            sum += 2 * f.applyAsDouble(a + i * h);
+        }
+        return (h / 2) * sum;
+    }
+
+    double simpson13(DoubleUnaryOperator f, double a, double b, int n) {
+        double h = (b - a) / n;
+        double sum = f.applyAsDouble(a) + f.applyAsDouble(b);
+        for (int i = 1; i < n; i++) {
+            sum += (i % 2 == 0 ? 2 : 4) * f.applyAsDouble(a + i * h);
+        }
+        return (h / 3) * sum;
+    }
+
+    double simpson38(DoubleUnaryOperator f, double a, double b, int n) {
+        double h = (b - a) / n;
+        double sum = f.applyAsDouble(a) + f.applyAsDouble(b);
+        for (int i = 1; i < n; i++) {
+            sum += (i % 3 == 0 ? 2 : 3) * f.applyAsDouble(a + i * h);
+        }
+        return (3 * h / 8) * sum;
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new NumericalIntegrationGUI().setVisible(true));
+        new NumericalIntegrationGUI();
     }
 }
-
